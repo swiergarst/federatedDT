@@ -7,8 +7,8 @@ import sys
 def master():
     pass
 
-def RPC_create_first_tree(data):
-    model = GradientBoostingClassifier(n_estimators=1, warm_start=True)
+def RPC_create_first_tree(data, seed):
+    model = GradientBoostingClassifier(n_estimators=1, warm_start=True, random_state=seed)
 
     dim_num = 784
     dims = ['pixel' + str(i) for i in range(dim_num)]

@@ -19,7 +19,7 @@ client = ClientMockProtocol(
 organizations = client.get_organizations_in_my_collaboration()
 org_ids = [organization["id"] for organization in organizations]
 
-num_global_rounds = 10
+num_global_rounds = 100
 parameters = [np.zeros((1,784)), np.zeros((1))]
 num_clients = 10
 accuracies = np.zeros((num_global_rounds))
@@ -41,7 +41,8 @@ results = client.get_results(first_round.get("id"))
 accuracies[0] = results[0][0]
 
 #print(results[0][1])
-trees = results[0][1]
+model = results[0][1]
+print(model)
 
 for round in range(1, num_global_rounds):
 
@@ -49,21 +50,23 @@ for round in range(1, num_global_rounds):
         input_= {
             'method' : 'create_other_trees',
             'kwargs' : {
-                'tree_num' : round,
-                'estimators' : trees
+                'tree_num' : round + 1,
+                'model' : model
                 }
         },
-        organization_ids=[org_ids[round]]
+        organization_ids=[org_ids[round%10]]
     )
     ## aggregate responses
     results = client.get_results(round_task.get("id"))
     accuracies[round] = results[0][0]
-    trees = results[0][1]
-
+    model = results[0][1]
+    #print(trees)
+    #print(model)
     #map.save_round(round, coefs, avg_coef, is_dict=False)
     #parameters = [avg_coef, avg_intercept]
 
 print(repr(accuracies))
-plt.plot(np.arange(num_global_rounds), accuracies.T)
+print(model.n_estimators_)
+plt.plot(np.arange(num_global_rounds), accuracies.T, '.')
 plt.show()
 #map.show_map()

@@ -9,7 +9,7 @@ from vantage6.client import Client
 import time
 from vantage6.tools.util import info
 from io import BytesIO
-
+from sklearn.ensemble import GradientBoostingClassifier
 
 
 start_time = time.time()
@@ -26,7 +26,7 @@ client.setup_encryption(privkey)
 ids = [org['id'] for org in client.collaboration.get(1)['organizations']]
 
 
-num_global_rounds = 10
+num_global_rounds = 100
 num_clients = 10
 num_runs = 4
 seed_offset = 0
@@ -48,9 +48,12 @@ global_accuracies = np.zeros((num_runs, num_global_rounds))
 #map = heatmap(num_clients, num_global_rounds )
 
 
-for run in num_runs:
+for run in range(num_runs):
     seed = run + seed_offset
+    np.random.seed(seed)
+    model = GradientBoostingClassifier(n_estimators=1, warm_start=True, random_state=seed)
 
+    '''
     # first round is slightly different now
     first_round = client.post_task(
             input_= {
@@ -60,10 +63,11 @@ for run in num_runs:
             }
         },
         name = "trees, first round",
-        image = "sgarst/federated-learning:fedTrees",
+        image = "sgarst/federated-learning:fedTrees2",
         organization_ids=[ids[0]],
         collaboration_id = 1
     )
+
     ## aggregate responses for the first round
 
     info("Waiting for results")
@@ -82,19 +86,19 @@ for run in num_runs:
 
     #print(results[0][1])
     model = results[1]
+    '''
 
-    for round in range(1, num_global_rounds):
+    for round in range(num_global_rounds):
         print("starting round ", round)
         round_task = client.post_task(
             input_= {
                 'method' : 'create_other_trees',
-                'kwargs' : {
-                    'tree_num' : round + 1,
+                'kwargs' : { 
                     'model' : model
                     }
             },
             name = "trees, round " + str(round),
-            image = "sgarst/federated-learning:fedTrees",
+            image = "sgarst/federated-learning:fedTrees2",
             organization_ids=[ids[round%num_clients]],
             collaboration_id = 1
         )
@@ -114,22 +118,24 @@ for run in num_runs:
         local_accuracies[run, round] = results[0]
         model = results[1]
         global_accuracies[run, round] = model.score(X_test, y_test)
-        if save_file:
-        ### save arrays to files
-            with open (week + prefix + "local_seed" + str(seed) + ".npy", 'wb') as f:
-                np.save(f, local_accuracies)
-            
-            with open (week + prefix + "global_seed" + str(seed) + ".npy", 'wb') as f:
-                np.save(f, global_accuracies)
+        model.set_params(n_estimators = round + 2)
+    if save_file:
+    ### save arrays to files
+        with open (week + prefix + "local_seed" + str(seed) + ".npy", 'wb') as f:
+            np.save(f, local_accuracies)
+        
+        with open (week + prefix + "global_seed" + str(seed) + ".npy", 'wb') as f:
+            np.save(f, global_accuracies)
 
 
     #print(trees)
     #print(model)
     #map.save_round(round, coefs, avg_coef, is_dict=False)
     #parameters = [avg_coef, avg_intercept]
-
+'''
 print(repr(accuracies))
 print(model.n_estimators_)
 plt.plot(np.arange(num_global_rounds), accuracies.T, '.')
 plt.show()
+'''
 #map.show_map()

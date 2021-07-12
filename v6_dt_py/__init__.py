@@ -24,7 +24,7 @@ def RPC_create_first_tree(data, seed):
     return ([result, model])
 
 def RPC_create_other_trees(data, tree_num, model):
-    
+
     #model.init_ = estimators 
     #print(estimators)
     #model = GradientBoostingClassifier()
@@ -37,7 +37,7 @@ def RPC_create_other_trees(data, tree_num, model):
     y_test_arr = data.loc[data['test/train'] == 'test']['label'].values
 
     #print(model)
-    model.set_params(n_estimators=tree_num)
+    #model.set_params(n_estimators=tree_num)
     model.fit(X_train_arr, y_train_arr)
 
     result = model.score(X_test_arr, y_test_arr)

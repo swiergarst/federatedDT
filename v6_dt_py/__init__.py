@@ -23,7 +23,7 @@ def RPC_create_first_tree(data, seed):
     result = model.score(X_test_arr, y_test_arr)
     return ([result, model])
 
-def RPC_create_other_trees(data, tree_num, model):
+def RPC_create_other_trees(data, model):
 
     #model.init_ = estimators 
     #print(estimators)

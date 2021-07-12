@@ -26,7 +26,7 @@ client.setup_encryption(privkey)
 ids = [org['id'] for org in client.collaboration.get(1)['organizations']]
 
 
-num_global_rounds = 100
+num_global_rounds = 10
 num_clients = 10
 num_runs = 4
 seed_offset = 0
@@ -35,10 +35,12 @@ save_file = True
 class_imbalance = False
 sample_imbalance = False
 
-dataset = "MNIST_2class_IID"
-datasets, parameters, X_test, y_test, c, ci = get_config(dataset, num_clients, class_imbalance, sample_imbalance)
 
-week = "../datafiles/w11/"
+dataset = "MNIST_2class_IID"
+model_choice = "FNN"
+datasets, parameters, X_test, y_test, c, ci = get_config(dataset, model_choice,  num_clients, class_imbalance, sample_imbalance)
+
+week = "../datafiles/w12/"
 prefix = "Trees_IID_"
 
 parameters = [np.zeros((1,784)), np.zeros((1))]
@@ -98,7 +100,7 @@ for run in range(num_runs):
                     }
             },
             name = "trees, round " + str(round),
-            image = "sgarst/federated-learning:fedTrees2",
+            image = "sgarst/federated-learning:fedTrees3",
             organization_ids=[ids[round%num_clients]],
             collaboration_id = 1
         )

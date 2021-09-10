@@ -7,7 +7,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '../..'))
 from helper_functions import get_datasets, heatmap
 
 
-dataset = "MNIST_2class_IID"
+dataset = "MNIST_2class"
 ### connect to server
 datasets = get_datasets(dataset)
 #datasets.remove("/home/swier/Documents/afstuderen/nnTest/v6_simpleNN_py/local/MNIST_2Class_IID/MNIST_2Class_IID_client9.csv")
@@ -19,7 +19,7 @@ client = ClientMockProtocol(
 organizations = client.get_organizations_in_my_collaboration()
 org_ids = [organization["id"] for organization in organizations]
 
-num_global_rounds = 100
+num_global_rounds = 10
 parameters = [np.zeros((1,784)), np.zeros((1))]
 num_clients = 10
 accuracies = np.zeros((num_global_rounds))

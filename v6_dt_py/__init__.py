@@ -10,11 +10,9 @@ def master():
 def RPC_create_first_tree(data, seed):
     model = GradientBoostingClassifier(n_estimators=1, warm_start=True, random_state=seed)
 
-    dim_num = 784
-    dims = ['pixel' + str(i) for i in range(dim_num)]
-    X_train_arr = data.loc[data['test/train'] == 'train'][dims].values
+    X_train_arr = data.loc[data['test/train'] == 'train'].drop(columns = ['test/train', 'label']).values
     y_train_arr = data.loc[data['test/train'] == 'train']['label'].values
-    X_test_arr = data.loc[data['test/train'] == 'test'][dims].values
+    X_test_arr = data.loc[data['test/train'] == 'test'].drop(columns = ["test/train", "label"]).values
     y_test_arr = data.loc[data['test/train'] == 'test']['label'].values
 
     model.fit(X_train_arr, y_train_arr)
@@ -28,12 +26,10 @@ def RPC_create_other_trees(data, model):
     #model.init_ = estimators 
     #print(estimators)
     #model = GradientBoostingClassifier()
-    print(model)
-    dim_num = 784
-    dims = ['pixel' + str(i) for i in range(dim_num)]
-    X_train_arr = data.loc[data['test/train'] == 'train'][dims].values
+    #print(model)
+    X_train_arr = data.loc[data['test/train'] == 'train'].drop(columns = ['test/train', 'label']).values
     y_train_arr = data.loc[data['test/train'] == 'train']['label'].values
-    X_test_arr = data.loc[data['test/train'] == 'test'][dims].values
+    X_test_arr = data.loc[data['test/train'] == 'test'].drop(columns = ["test/train", "label"]).values
     y_test_arr = data.loc[data['test/train'] == 'test']['label'].values
 
     #print(model)

@@ -4,7 +4,10 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
-from helper_functions import get_config, heatmap, get_save_str
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from config_functions import get_config, get_save_str
+
+from helper_functions import  heatmap
 from vantage6.client import Client
 import time
 from vantage6.tools.util import info
@@ -26,22 +29,22 @@ client.setup_encryption(privkey)
 ids = [org['id'] for org in client.collaboration.get(1)['organizations']]
 
 
-num_global_rounds = 10
+num_global_rounds = 100
 num_clients = 10
 num_runs = 4
 seed_offset = 0
 
 save_file = True
 class_imbalance = False
-sample_imbalance = False
+sample_imbalance = True
 
 
-dataset = "MNIST_2class_IID"
+dataset = "A2"
 model_choice = "FNN"
 datasets, parameters, X_test, y_test, c, ci = get_config(dataset, model_choice,  num_clients, class_imbalance, sample_imbalance)
 
-week = "../datafiles/w12/"
-prefix = "Trees_IID_"
+week = "../datafiles/w17/"
+prefix = "Trees_A2"
 
 parameters = [np.zeros((1,784)), np.zeros((1))]
 local_accuracies = np.zeros((num_runs, num_global_rounds))

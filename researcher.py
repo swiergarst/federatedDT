@@ -36,17 +36,24 @@ seed_offset = 0
 
 save_file = True
 class_imbalance = False
-sample_imbalance = True
+sample_imbalance = False
 
 
-dataset = "A2"
+dataset = "fashion_MNIST"
 model_choice = "FNN"
 datasets, parameters, X_test, y_test, c, ci = get_config(dataset, model_choice,  num_clients, class_imbalance, sample_imbalance)
 
-week = "../datafiles/w17/"
-prefix = "Trees_A2"
+week = "datafiles/w21/"
+prefix = "Trees_A2_CI"
 
-parameters = [np.zeros((1,784)), np.zeros((1))]
+
+if dataset == "fashion_MNIST":
+    n_classes = 10
+elif dataset == "MNIST_4class":
+    n_classes = 4
+else:
+    n_classes = 2
+#parameters = [np.zeros((1,784)), np.zeros((1))]
 local_accuracies = np.zeros((num_runs, num_global_rounds))
 global_accuracies = np.zeros((num_runs, num_global_rounds))
 
@@ -57,7 +64,7 @@ for run in range(num_runs):
     seed = run + seed_offset
     np.random.seed(seed)
     model = GradientBoostingClassifier(n_estimators=1, warm_start=True, random_state=seed)
-
+    model.n_classes_ = n_classes
     '''
     # first round is slightly different now
     first_round = client.post_task(
@@ -103,7 +110,7 @@ for run in range(num_runs):
                     }
             },
             name = "trees, round " + str(round),
-            image = "sgarst/federated-learning:fedTrees3",
+            image = "sgarst/federated-learning:fedTrees4",
             organization_ids=[ids[round%num_clients]],
             collaboration_id = 1
         )

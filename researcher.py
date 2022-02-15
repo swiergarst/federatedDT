@@ -28,23 +28,30 @@ client.setup_encryption(privkey)
 
 ids = [org['id'] for org in client.collaboration.get(1)['organizations']]
 
+### parameter settings
 
-num_global_rounds = 100
-num_clients = 10
-num_runs = 4
-seed_offset = 0
+num_global_rounds = 100 #communication rounds (and amount of trees)
+num_clients = 10 #amount of federated clients (make sure this matches the amount of running vantage6 clients)
+num_runs = 4 #amount of experiments to run using consecutive seeds
+seed_offset = 0 #decides which seeds to use: seed = seed_offset + current_run_number
 
-save_file = True
+save_file = True # whether to save results in .npy files
+
+# these settings change the distribution of the datasets between clients. sample_imbalance is not checked if class_imbalance is set to true
 class_imbalance = False
 sample_imbalance = False
 
 
-dataset = "fashion_MNIST"
-model_choice = "FNN"
-datasets, parameters, X_test, y_test, c, ci = get_config(dataset, model_choice,  num_clients, class_imbalance, sample_imbalance)
+dataset = "fashion_MNIST" #options: MNIST_2class, MNIST_4class, fashion_MNIST, A2_PCA, 3node
 
-week = "datafiles/w21/"
-prefix = "Trees_fashion_MNIST_CI"
+week = "datafiles/w21/" #folder for saving data files 
+prefix = "Trees_fashion_MNIST_CI" #datafile string prefix
+
+### end parameter settings ###
+
+
+datasets, parameters, X_test, y_test, c, ci = get_config(dataset, "FNN",  num_clients, class_imbalance, sample_imbalance)
+
 
 
 if dataset == "fashion_MNIST":

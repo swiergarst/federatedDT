@@ -1,5 +1,6 @@
 from numpy import mod, recarray
 import numpy as np
+from numpy.lib.function_base import average
 from sklearn import tree
 from sklearn.ensemble import GradientBoostingClassifier
 import sys
@@ -21,6 +22,18 @@ def RPC_create_first_tree(data, seed):
     
     result = model.score(X_test_arr, y_test_arr)
     return ([result, model])
+
+def RPC_get_metadata(data):
+    classes = data['label'].unique()
+    averages = np.zeros((len(classes), data.shape[1] -2))
+    avg = {}
+    #print(classes)
+    for i, class_i in enumerate(classes):
+        #print(i)
+        class_data = data.loc[data['label'] == class_i].drop(columns = ['test/train', 'label']).values
+        averages[i, :] = np.mean(class_data, axis = 0)
+        avg[class_i] = np.copy(averages[i,:])
+    return avg
 
 def RPC_create_other_trees(data, model):
 

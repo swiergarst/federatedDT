@@ -44,7 +44,7 @@ model_choice = "FNN"
 datasets, parameters, X_test, y_test, c, ci = get_config(dataset, model_choice,  num_clients, class_imbalance, sample_imbalance)
 
 week = "datafiles/w21/"
-prefix = "Trees_A2_CI"
+prefix = "Trees_fashion_MNIST_CI"
 
 
 if dataset == "fashion_MNIST":
@@ -65,41 +65,30 @@ for run in range(num_runs):
     np.random.seed(seed)
     model = GradientBoostingClassifier(n_estimators=1, warm_start=True, random_state=seed)
     model.n_classes_ = n_classes
-    '''
-    # first round is slightly different now
-    first_round = client.post_task(
-            input_= {
-            'method' : 'create_first_tree',
-            'kwargs' : {
-                'seed' : seed
-            }
+
+
+    # request averages per class
+    print("requesting averages")
+    meta_task = client.post_task(
+        input_= {
+            'method' : "get_metadata"
         },
-        name = "trees, first round",
-        image = "sgarst/federated-learning:fedTrees2",
-        organization_ids=[ids[0]],
-        collaboration_id = 1
+        name = "average task",
+        image = "sgarst/federated-learning:fedTrees6",
+        organization_ids=ids,
+        collaboration_id=1
     )
+    res = client.get_results(task_id=meta_task.get("id"))
+    attempts = 0
+    while(None in [res[i]["result"] for i in range(num_clients)] and attempts < 20):
+            print("waiting...")
+            time.sleep(1)
+            res = np.array(client.get_results(task_id=meta_task.get("id")))
+            attempts += 1
+    results = np.array(np.load(BytesIO(res["result"]),allow_pickle=True), dtype=object)
+    print(results.shape)
 
-    ## aggregate responses for the first round
-
-    info("Waiting for results")
-    res = client.get_results(task_id=first_round.get("id"))
-    attempts=1
-    #print(res)
-    while(res[0]["result"] == None  and attempts < 20):
-        print("waiting...")
-        time.sleep(1)
-        res = client.get_results(task_id=first_round.get("id"))
-        attempts += 1
-
-    results = np.array(np.load(BytesIO(res[0]["result"]),allow_pickle=True), dtype=object)
-    print(results)
-    local_accuracies[run, 0] = results[0]
-
-    #print(results[0][1])
-    model = results[1]
-    '''
-
+    sys.exit()
     for round in range(num_global_rounds):
         print("starting round ", round)
         round_task = client.post_task(
@@ -110,7 +99,7 @@ for run in range(num_runs):
                     }
             },
             name = "trees, round " + str(round),
-            image = "sgarst/federated-learning:fedTrees4",
+            image = "sgarst/federated-learning:fedTrees5",
             organization_ids=[ids[round%num_clients]],
             collaboration_id = 1
         )

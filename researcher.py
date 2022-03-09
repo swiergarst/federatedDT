@@ -17,8 +17,6 @@ from sklearn.ensemble import GradientBoostingClassifier
 
 start_time = time.time()
 
-#datasets.remove("/home/swier/Documents/afstuderen/nnTest/v6_simpleNN_py/local/MNIST_2Class_IID/MNIST_2Class_IID_client9.csv")
-
 print("Attempt login to Vantage6 API")
 client = Client("http://localhost", 5000, "/api")
 client.authenticate("researcher", "1234")
@@ -90,10 +88,31 @@ for run in range(num_runs):
     while(None in [res[i]["result"] for i in range(num_clients)] and attempts < 20):
             print("waiting...")
             time.sleep(1)
-            res = np.array(client.get_results(task_id=meta_task.get("id")))
+            res = client.get_results(task_id=meta_task.get("id"))
             attempts += 1
-    results = np.array(np.load(BytesIO(res["result"]),allow_pickle=True), dtype=object)
-    print(results.shape)
+    
+
+    results = [np.load(BytesIO(res[i]["result"]),allow_pickle=True) for i in range(num_clients)]
+
+    avgs = np.empty(num_clients, dtype=object)
+    samples = np.empty(num_clients, dtype=object)
+
+    for i in range(num_clients):
+        avgs[i] = results[i][0]
+        samples[i] = results[i][1]
+
+    print(avgs)
+    avg = {} 
+    samp = {}
+    for client_i in range(num_clients):
+        for key in avgs[client_i].keys():
+            if key in avg.keys():
+                avg[key] += np.copy(avgs[client_i][key] * samples[client_i][key])
+                samp[key] += samples[client_i][key]        
+            else:
+                avg[key] = np.copy(avgs[client_i][key] * samples[client_i][key])
+                samp[key] = samples[client_i][key]    
+
 
     sys.exit()
     for round in range(num_global_rounds):

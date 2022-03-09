@@ -59,7 +59,32 @@ task = client.create_new_task(
     organization_ids=org_ids
 )
 results = client.get_results(task.get("id"))
-print(results[].shape)
+
+avgs = np.empty(num_clients, dtype=object)
+samples = np.empty(num_clients, dtype=object)
+for i in range(num_clients):
+    avgs[i] = results[i][0]
+    samples[i] = results[i][1] 
+
+avg = {} 
+samp = {}
+
+print(avgs[0].keys())
+
+for client_i in range(num_clients):
+    for key in avgs[client_i].keys():
+        if key in avg.keys():
+            avg[key] += np.copy(avgs[client_i][key] * samples[client_i][key])
+            samp[key] += samples[client_i][key]        
+        else:
+            avg[key] = np.copy(avgs[client_i][key] * samples[client_i][key])
+            samp[key] = samples[client_i][key]    
+
+
+for key in avg.keys():
+    avg[key] = avg[key]/samp[key]
+       
+print(avg)
 
 
 sys.exit()

@@ -27,13 +27,15 @@ def RPC_get_metadata(data):
     classes = data['label'].unique()
     averages = np.zeros((len(classes), data.shape[1] -2))
     avg = {}
+    samples = {}
     #print(classes)
     for i, class_i in enumerate(classes):
         #print(i)
         class_data = data.loc[data['label'] == class_i].drop(columns = ['test/train', 'label']).values
         averages[i, :] = np.mean(class_data, axis = 0)
         avg[class_i] = np.copy(averages[i,:])
-    return avg
+        samples[class_i] = class_data.shape[0]
+    return [avg, samples]
 
 def RPC_create_other_trees(data, model):
 

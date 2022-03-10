@@ -101,7 +101,7 @@ for run in range(num_runs):
         avgs[i] = results[i][0]
         samples[i] = results[i][1]
 
-    print(avgs)
+    #print(avgs)
     avg = {} 
     samp = {}
     for client_i in range(num_clients):
@@ -112,20 +112,36 @@ for run in range(num_runs):
             else:
                 avg[key] = np.copy(avgs[client_i][key] * samples[client_i][key])
                 samp[key] = samples[client_i][key]    
+    
+    for key in avg.keys():
+        avg[key] = avg[key]/samp[key]
 
+    
+    '''
+    with open ("class_based_averages_iid.npy", 'wb') as f:
+        np.save(f, [avg])
 
-    sys.exit()
+    with open ("samples_per_class.npy", 'wb') as f:
+        np.save(f, [samp])
+    ''' 
+
+    model.n_classes_ = len(avg.keys())
+    model.classes_ = list(avg.keys())
+    
+    
+    
     for round in range(num_global_rounds):
         print("starting round ", round)
         round_task = client.post_task(
             input_= {
                 'method' : 'create_other_trees',
                 'kwargs' : { 
-                    'model' : model
+                    'model' : model,
+                    'class_avg' : avg
                     }
             },
             name = "trees, round " + str(round),
-            image = "sgarst/federated-learning:fedTrees5",
+            image = "sgarst/federated-learning:fedTrees6",
             organization_ids=[ids[round%num_clients]],
             collaboration_id = 1
         )

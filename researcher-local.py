@@ -10,7 +10,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 
 dataset = "fashion_MNIST"
 ### connect to server
-datasets = get_datasets(dataset, class_imbalance=False)
+datasets = get_datasets(dataset, class_imbalance=True)
 #datasets.remove("/home/swier/Documents/afstuderen/nnTest/v6_simpleNN_py/local/MNIST_2Class_IID/MNIST_2Class_IID_client9.csv")
 client = ClientMockProtocol(
     datasets= datasets,
@@ -69,7 +69,7 @@ for i in range(num_clients):
 avg = {} 
 samp = {}
 
-print(avgs[0].keys())
+
 
 for client_i in range(num_clients):
     for key in avgs[client_i].keys():
@@ -84,17 +84,18 @@ for client_i in range(num_clients):
 for key in avg.keys():
     avg[key] = avg[key]/samp[key]
        
-print(avg)
+print(len(avg.keys()))
+model.n_classes_ = len(avg.keys())
+model.classes_ = list(avg.keys())
 
-
-sys.exit()
 for round in range(num_global_rounds):
-
+    
     round_task = client.create_new_task(
         input_= {
             'method' : 'create_other_trees',
             'kwargs' : {
-                'model' : model
+                'model' : model,
+                "avg" : avg
                 }
         },
        #organization_ids=[order[round]]
@@ -104,6 +105,7 @@ for round in range(num_global_rounds):
     results = client.get_results(round_task.get("id"))
     accuracies[round] = results[0][0]
     model = results[0][1]
+    #print(model.classes_)
     #print(trees)
     #print(model)
     #map.save_round(round, coefs, avg_coef, is_dict=False)

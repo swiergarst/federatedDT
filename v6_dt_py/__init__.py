@@ -1,3 +1,4 @@
+from marshmallow import missing
 from numpy import mod, recarray
 import numpy as np
 from numpy.lib.function_base import average
@@ -37,7 +38,7 @@ def RPC_get_metadata(data):
         samples[class_i] = class_data.shape[0]
     return [avg, samples]
 
-def RPC_create_other_trees(data, model):
+def RPC_create_other_trees(data, model, avg):
 
     #model.init_ = estimators 
     #print(estimators)
@@ -50,17 +51,17 @@ def RPC_create_other_trees(data, model):
     #n_classes = data['label'].unique().shape
     data_classes = data['label'].unique()
     # check to see if we need to add dummy data
-    if data_classes.shape[0] < model.n_classes_:
-        req_class_num = model.n_classes_
-        data_shape = X_train_arr.shape[1]
-        #print(data_shape)
-        #classes = [i for i in range(req_class_num)]
-        for c in range(req_class_num):
-            if c not in data_classes:
-                dummy = np.zeros((1,data_shape))
+    print("data classes:" , len(data_classes))
+    
+    if len(data_classes) < model.n_classes_:
+        missing_classes = np.invert(np.in1d(model.classes_, data_classes))
+        req_classes = model.classes_
+        for c_i, c in enumerate(req_classes): 
+            if missing_classes[c_i]:  
+                dummy = np.reshape(avg[c], (-1, avg[c].size))
                 X_train_arr = np.concatenate((X_train_arr, dummy), axis = 0)
                 y_train_arr = np.append(y_train_arr, c)
-
+    
     
     #print(model.n_classes_)
     #print(X_train_arr.shape, y_train_arr.shape)

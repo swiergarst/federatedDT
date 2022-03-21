@@ -36,14 +36,14 @@ seed_offset = 0 #decides which seeds to use: seed = seed_offset + current_run_nu
 save_file = True # whether to save results in .npy files
 
 # these settings change the distribution of the datasets between clients. sample_imbalance is not checked if class_imbalance is set to true
-class_imbalance = False
+class_imbalance = True
 sample_imbalance = False
 
 
 dataset = "fashion_MNIST" #options: MNIST_2class, MNIST_4class, fashion_MNIST, A2_PCA, 3node
 
-week = "datafiles/w21/" #folder for saving data files 
-prefix = "Trees_fashion_MNIST_CI" #datafile string prefix
+week = "afstuderen/datafiles/w28/" #folder for saving data files 
+prefix = "Trees_fashion_MNIST_CI_updated" #datafile string prefix
 
 ### end parameter settings ###
 
@@ -85,13 +85,16 @@ for run in range(num_runs):
     )
     res = client.get_results(task_id=meta_task.get("id"))
     attempts = 0
+
     while(None in [res[i]["result"] for i in range(num_clients)] and attempts < 20):
             print("waiting...")
             time.sleep(1)
+
             res = client.get_results(task_id=meta_task.get("id"))
             attempts += 1
     
-
+    #print(res[0])
+    #results = client.get_results(task_id=task.get("id"))
     results = [np.load(BytesIO(res[i]["result"]),allow_pickle=True) for i in range(num_clients)]
 
     avgs = np.empty(num_clients, dtype=object)
@@ -137,11 +140,11 @@ for run in range(num_runs):
                 'method' : 'create_other_trees',
                 'kwargs' : { 
                     'model' : model,
-                    'class_avg' : avg
+                    'avg' : avg
                     }
             },
             name = "trees, round " + str(round),
-            image = "sgarst/federated-learning:fedTrees6",
+            image = "sgarst/federated-learning:fedTrees7",
             organization_ids=[ids[round%num_clients]],
             collaboration_id = 1
         )

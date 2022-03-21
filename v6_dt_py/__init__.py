@@ -1,5 +1,3 @@
-from marshmallow import missing
-from numpy import mod, recarray
 import numpy as np
 from numpy.lib.function_base import average
 from sklearn import tree
@@ -51,16 +49,18 @@ def RPC_create_other_trees(data, model, avg):
     #n_classes = data['label'].unique().shape
     data_classes = data['label'].unique()
     # check to see if we need to add dummy data
-    print("data classes:" , len(data_classes))
+    #print("data classes:" , len(data_classes))
     
     if len(data_classes) < model.n_classes_:
         missing_classes = np.invert(np.in1d(model.classes_, data_classes))
         req_classes = model.classes_
         for c_i, c in enumerate(req_classes): 
-            if missing_classes[c_i]:  
-                dummy = np.reshape(avg[c], (-1, avg[c].size))
+            if missing_classes[c_i]:
+                dummy = np.array([np.copy(avg[c])])
+                #print(dummy.shape)
+                #dummy = np.reshape(avg[c], (-1, avg[c].size))
                 X_train_arr = np.concatenate((X_train_arr, dummy), axis = 0)
-                y_train_arr = np.append(y_train_arr, c)
+                y_train_arr = np.concatenate((y_train_arr, [c]))
     
     
     #print(model.n_classes_)
